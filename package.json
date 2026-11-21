@@ -1,0 +1,24 @@
+{
+  "name": "blueveta-upright-mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MCP (Model Context Protocol) server exposing a detect_rotation tool backed by the real, paid BlueVetaUpright rotation-detection API. BYOK: bills the caller's own BlueVetaUpright API key, same as the REST API -- never the free demo route.",
+  "main": "src/server.js",
+  "bin": {
+    "blueveta-upright-mcp": "src/server.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node src/detectRotation.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tomerbarm/blueveta-upright-mcp.git"
+  },
+  "homepage": "https://blueveta.com/upright",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  }
+}

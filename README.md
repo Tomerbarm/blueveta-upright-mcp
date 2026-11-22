@@ -29,6 +29,17 @@ Then point your MCP client at `node src/server.js` (stdio transport) in this dir
 call can also override the key per-invocation with an `apiKey` argument if that fits your
 client's auth model better than an environment variable.
 
+## Docker
+
+```bash
+docker build -t blueveta-upright-mcp .
+docker run -i --rm -e BLUEVETA_UPRIGHT_API_KEY=bvu_live_... blueveta-upright-mcp
+```
+
+The server speaks MCP over stdio, so run the container with `-i` (interactive, keeps stdin
+open) and point your MCP client at the `docker run` command itself as the server's launch
+command, rather than at `node src/server.js` directly.
+
 ## The tool
 
 `detect_rotation(imageUrl | imageBase64, returnImage?, apiKey?)` → the same response shape

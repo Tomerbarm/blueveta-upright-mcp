@@ -1,0 +1,156 @@
+# BlueVetaUpright — real OpenAPI 3.0 spec for the paid, public API.
+# Written 2026-09-30 for listing on marketplaces that support OpenAPI import
+# (APILayer, Zyla API Hub, api.market, RapidAPI). Matches the real, live
+# contract exactly as documented in src/data/upright.js and implemented in
+# functions/api/upright/detect.js — every field, every note code, the real
+# two-pricing-mode (?returnImage=true) behavior. Nothing here is guessed.
+openapi: 3.0.3
+info:
+  title: BlueVetaUpright
+  description: >-
+    Detects whether a product photo is sideways or upside-down, and tells you
+    the exact fix. Send raw image bytes or a URL; get back the 4-axis
+    rotation (0/90/180/270°) plus the full fine-tilt angle, both with
+    calibrated confidence scores. Priced at 3¢ per credit, pay only as you
+    use it (real per-call cost, no subscription).
+  version: "1.0.0"
+  contact:
+    name: BlueVeta
+    url: https://blueveta.com/upright
+servers:
+  - url: https://blueveta.com
+paths:
+  /api/upright/detect:
+    post:
+      summary: Detect a product photo's rotation and how to fix it
+      description: >-
+        Two call modes: signal-only (default, 1 credit) returns the rotation
+        fields only; signal + corrected photo (`?returnImage=true`, 1.5
+        credits) also returns the photo already rotated for you. Send EITHER
+        raw image bytes (any common format — JPEG, PNG, WebP, or HEIC) with
+        `Content-Type` set to the image's mime type, OR a JSON body naming a
+        public URL to fetch server-side.
+      operationId: detectRotation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: returnImage
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            When true, the response also includes the photo already rotated
+            upright (imageBase64/imageMimeType). Costs 1.5 credits instead of 1.
+      requestBody:
+        required: true
+        content:
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/webp:
+            schema:
+              type: string
+              format: binary
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: A public URL to an image, fetched server-side (max 20MB).
+      responses:
+        "200":
+          description: A real, resolved (or honestly-flagged-uncertain) rotation answer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetectResponse"
+        "400":
+          description: Bad request (invalid/missing image, disallowed URL, inference failure).
+        "401":
+          description: Missing or invalid API key.
+        "402":
+          description: Insufficient credit balance.
+        "429":
+          description: Rate limit exceeded — see X-RateLimit-* response headers.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: "Authorization: Bearer bvu_live_... (or bvu_test_... in test mode)"
+  schemas:
+    DetectResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        wasAlreadyUpright:
+          type: boolean
+          description: If true, no rotation is needed at all.
+        rotationClockwise4Axis:
+          type: integer
+          enum: [0, 90, 180, 270]
+          description: The 4-axis part of the fix alone, clockwise degrees.
+        confidence4Axis:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: The 4-axis stage's own calibrated confidence.
+        rotationClockwiseFull:
+          type: integer
+          minimum: 0
+          maximum: 360
+          description: The complete precise rotation needed — 4-axis plus fine-tilt combined, clockwise degrees.
+        confidenceFull:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: >-
+            The full answer's honestly-calibrated confidence — genuinely
+            lower than confidence4Axis on purpose (confidence4Axis × the
+            real, measured rate the fine-tilt step is itself correct given a
+            correct 4-axis read).
+        exifOnlyRemainder:
+          type: integer
+          nullable: true
+          description: >-
+            Present only if the photo's camera EXIF tag implies a rotation.
+            Signed degrees still needed if you rely on the tag alone instead
+            of the numbers above.
+        resolved:
+          type: boolean
+          description: >-
+            False means "don't auto-apply, have a person look" — still a
+            real, billable answer either way, just honestly flagged as less
+            certain.
+        note:
+          type: string
+          nullable: true
+          enum: [null, low_confidence, exif_disagreement]
+          description: A plain-English flag. null when there's nothing to flag.
+        heicConverted:
+          type: boolean
+          description: True when the input was a HEIC (iPhone) photo decoded before analysis.
+        imageBase64:
+          type: string
+          nullable: true
+          description: Present only when returnImage=true was requested and charged for.
+        imageMimeType:
+          type: string
+          nullable: true
+        requestId:
+          type: string
+        latencyMs:
+          type: integer

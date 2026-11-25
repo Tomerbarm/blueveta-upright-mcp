@@ -4,6 +4,8 @@ An [MCP](https://modelcontextprotocol.io) server that gives any MCP-compatible A
 (Claude Desktop, and any other MCP-aware agent) a `detect_rotation` tool: checks whether a
 product photo is upright and, if not, exactly how many degrees to rotate it.
 
+[![Tomerbarm/blueveta-upright-mcp MCP server](https://glama.ai/mcp/servers/Tomerbarm/blueveta-upright-mcp/badges/score.svg)](https://glama.ai/mcp/servers/Tomerbarm/blueveta-upright-mcp)
+
 ## How billing works (read this first)
 
 This server is a thin wrapper around the real, **paid** BlueVetaUpright API

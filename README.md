@@ -5,6 +5,7 @@ An [MCP](https://modelcontextprotocol.io) server that gives any MCP-compatible A
 product photo is upright and, if not, exactly how many degrees to rotate it.
 
 [![Tomerbarm/blueveta-upright-mcp MCP server](https://glama.ai/mcp/servers/Tomerbarm/blueveta-upright-mcp/badges/score.svg)](https://glama.ai/mcp/servers/Tomerbarm/blueveta-upright-mcp)
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/tomerbarm/blueveta-upright-mcp)
 
 ## How billing works (read this first)
 
